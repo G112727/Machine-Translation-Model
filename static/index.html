@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Scientific Research Paper Translator</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 2rem auto; max-width: 800px; }
+    h1 { margin-bottom: .25rem; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    textarea, select, button, input { font-size: 1rem; }
+    textarea { width: 100%; min-height: 140px; padding: .75rem; border-radius: 10px; border: 1px solid #d1d5db; }
+    button { padding: .6rem 1rem; border-radius: 10px; border: 1px solid #111827; background: #111827; color: white; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .row { display: flex; gap: .75rem; align-items: center; margin: .5rem 0 1rem; }
+    .out { white-space: pre-wrap; border: 1px solid #d1d5db; border-radius: 10px; padding: .75rem; min-height: 100px; background: #fafafa; }
+    .hint { color: #6b7280; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Scientific Research Paper Translator</h1>
+  <p class="hint">Paste an English abstract, pick target language, click Translate.</p>
+
+  <div class="card">
+    <textarea id="input" placeholder="Add abstract to translate"></textarea>
+
+    <div class="row">
+      <label for="target">Target:</label>
+      <select id="target">
+        <option value="es">Spanish (ES)</option>
+        <option value="pt">Portuguese (PT)</option>
+      </select>
+      <button id="go">Translate</button>
+    </div>
+
+    <div class="out" id="output"></div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('go');
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+    const target = document.getElementById('target');
+
+    btn.addEventListener('click', async () => {
+      const text = input.value.trim();
+      if (!text) { output.textContent = ""; return; }
+      btn.disabled = true; btn.textContent = "Translating…";
+      output.textContent = "";
+
+      try {
+        const res = await fetch('/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, target: target.value })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        output.textContent = data.translation || "";
+      } catch (err) {
+        output.textContent = "Error: " + err.message;
+      } finally {
+
+        
+        btn.disabled = false; btn.textContent = "Translate";
+      }
+    });
+  </script>
+</body>
+</html>

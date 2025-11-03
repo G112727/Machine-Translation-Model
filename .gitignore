@@ -1,0 +1,17 @@
+﻿# large ML artifacts
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.h5
+*.onnx
+*.pkl
+*.npz
+*.zip
+*.tar
+*.tar.gz
+*.7z
+data/
+datasets/
+checkpoints/
+models/
