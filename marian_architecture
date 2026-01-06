@@ -1,0 +1,70 @@
+digraph marian_architecture {
+	fontsize=12 label="Hybrid Marian MT System (SciELO EN→ES / EN→PT)" labelloc=t rankdir=LR
+	scielo [label="SciELO Articles
+(XML / PDF)" shape=" cylinder"]
+	tmx [label="TMX Files
+(en-es.tmx, en-pt.tmx)" shape=folder]
+	tmx_loader [label="TMX Loader
+_iterparse + _read_tmx_pairs" shape=rectangle]
+	clean_dedup [label="Global Cleaning & Dedup
+(global_clean_and_dedup)" shape=rectangle]
+	split_ds [label="Deterministic Split
+split_to_datasets
+SPLIT_RATIO = 0.9" shape=rectangle]
+	ds_es [label="EN→ES Datasets
+train_es, valid_es" shape=tab]
+	ds_pt [label="EN→PT Datasets
+train_pt, valid_pt" shape=tab]
+	tok_es [label="Tokenizer (EN→ES)
+Helsinki-NLP/opus-mt-en-es" shape=component]
+	tok_pt [label="Tokenizer (EN→PT)
+Helsinki-NLP/opus-mt-tc-big-en-pt" shape=component]
+	tok_ds_es [label="Tokenised EN→ES
+train_es_tok, valid_es_tok" shape=tab]
+	tok_ds_pt [label="Tokenised EN→PT
+train_pt_tok, valid_pt_tok" shape=tab]
+	mod_es [label="Marian EN→ES Model
+mod_es" shape=box3d]
+	mod_pt [label="Marian EN→PT Model
+mod_pt" shape=box3d]
+	trainer_es [label="Trainer (EN→ES)
+Trainer(mod_es, train_es_tok, ...)" shape=rectangle]
+	trainer_pt [label="Trainer (EN→PT)
+Trainer(mod_pt, train_pt_tok, ...)" shape=rectangle]
+	ckpt_es [label="Fine-tuned EN→ES
+PROJECT_DIR/ckpt_es" shape=folder]
+	ckpt_pt [label="Fine-tuned EN→PT
+PROJECT_DIR/ckpt_pt" shape=folder]
+	eval_es [label="Evaluation EN→ES
+BLEU / chrF / TER / Exact" shape=parallelogram]
+	eval_pt [label="Evaluation EN→PT
+BLEU / chrF / TER / Exact" shape=parallelogram]
+	glossary [label="Glossary
+apply_glossary()" shape=note]
+	api_es [label="translate_es(text)
+Beam search + glossary" shape=oval]
+	api_pt [label="translate_pt(text)
+Beam search + glossary" shape=oval]
+	scielo -> tmx [label="alignment / preprocessing"]
+	tmx -> tmx_loader [label="TMX_FILES paths"]
+	tmx_loader -> clean_dedup
+	clean_dedup -> split_ds [label="clean pairs"]
+	split_ds -> ds_es [label="EN–ES"]
+	split_ds -> ds_pt [label="EN–PT"]
+	ds_es -> tok_es [label="src_text / tgt_text" style=dashed]
+	ds_pt -> tok_pt [label="src_text / tgt_text" style=dashed]
+	tok_es -> tok_ds_es [label="preprocess_any(..., 'es')"]
+	tok_pt -> tok_ds_pt [label="preprocess_any(..., 'pt')"]
+	tok_ds_es -> trainer_es [label=train_dataset]
+	tok_ds_pt -> trainer_pt [label=train_dataset]
+	trainer_es -> mod_es [label="fine-tuning" dir=both]
+	trainer_pt -> mod_pt [label="fine-tuning" dir=both]
+	trainer_es -> ckpt_es [label=checkpoints]
+	trainer_pt -> ckpt_pt [label=checkpoints]
+	mod_es -> eval_es [label="eval_chunked(...)"]
+	mod_pt -> eval_pt [label="eval_chunked(...)"]
+	glossary -> api_es
+	glossary -> api_pt
+	mod_es -> api_es
+	mod_pt -> api_pt
+}
