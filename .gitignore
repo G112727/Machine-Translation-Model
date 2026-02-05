@@ -15,3 +15,7 @@ data/
 datasets/
 checkpoints/
 models/
+*.safetensors
+cache_tok/
+*_lora/
+*_bilingual_*/
